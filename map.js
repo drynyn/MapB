@@ -82,7 +82,7 @@ sidebar.close();
 
 sidebar.addPanel({
 		id:   'measure',
-		tab:  ' <img src="./images/distanceIcon.png" alt="Ms" style="width:100%;height:100%; padding: 1px;"> ',
+		tab:  ' <img class = "toolbar-icon" src="./images/distanceIcon.png" alt="Ms" style="width:100%;height:100%; padding: 1px;"> ',
 		title: 'Measure',
 		button: function() {
 			polylineDistance = 0;
@@ -93,7 +93,7 @@ sidebar.addPanel({
 	})
 sidebar.addPanel({
 	id:   'marker',
-	tab:  ' <img src="./images/Marker.png" alt="Ms" style="width:100%;height:100%;padding-top:3px;"> ',
+	tab:  ' <img class = "toolbar-icon" src="./images/Marker.png" alt="Mk" style="width:100%;height:100%;padding-top:3px;"> ',
 	title: 'Place Marker',
 	button: function() {toolFunction = "marker";
 	disableLayerClicks(duchyGroup); //need to disable to click through layers
@@ -101,14 +101,13 @@ sidebar.addPanel({
 })
 sidebar.addPanel({
 	id:   'clearmarkers',
-	tab:  ' <img src="./images/X.png" alt="Ms" style="width:100%;height:100%;"> ',
+	tab:  ' <img class = "toolbar-icon" src="./images/trash.svg" alt="C" style="width:100%;height:100%;padding-top:3px;"> ',
 	title: 'Clear All',
 	button: function() {clearMarkers();},
 })
-
 sidebar.addPanel({
 	id:   'handtool',
-	tab:  ' H ',
+	tab: '<img class = "toolbar-icon" src="./images/hand.svg" alt="H" style="width:100%;height:100%;padding-top:3px;"> ',
 	title: 'Hand Tool',
 	button: function() {
 		enableLayerClicks(duchyGroup); //need to disable to click through layers
