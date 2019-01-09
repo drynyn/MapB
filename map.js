@@ -97,7 +97,6 @@ sidebar.addPanel({
 	title: 'Place Marker',
 	button: function() {toolFunction = "marker";
 	disableLayerClicks(duchyGroup); //need to disable to click through layers
-
 },
 })
 sidebar.addPanel({
@@ -116,7 +115,7 @@ sidebar.addPanel({
 		toolFunction = "";
 	}
 })
-	
+
 //===================
 //Create controls
 //===================
