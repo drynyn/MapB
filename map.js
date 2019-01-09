@@ -225,8 +225,24 @@ L.control.clearButton = function(opts) {
     //===================
     function placeMarker (latlng) {
 		var translatlng = translateSimpleToRealCoord(latlng);
-		return marker = L.marker(latlng).bindPopup('Coord: ' + translatlng.lat.toFixed(2) + ', ' + translatlng.lng.toFixed(2)).addTo(markers);		
-    }
+		var popupText = 'Coord: ' + translatlng.lat.toFixed(2) + ', ' + translatlng.lng.toFixed(2)
+		var marker = L.marker(latlng);
+
+		marker.bindPopup(popupText + ' ' + "</br><input type='button' value='Delete' class='marker-delete-button'/>");
+		marker.on("popupopen", onMarkerPopupOpen);
+		marker.addTo(markers);
+		return marker;		
+		}
+	
+	//handles events for marker popup
+	function onMarkerPopupOpen() {
+		var tempMarker = this;
+	
+		// To remove marker on click of delete button in the popup of marker
+		$(".marker-delete-button:visible").click(function () {
+			map.removeLayer(tempMarker);
+		});
+	}
 
     function placeMeasurePolyline(latlng){
 
