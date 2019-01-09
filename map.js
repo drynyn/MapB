@@ -149,8 +149,6 @@ sidebar.disablePanel('spacer2');
 //Create controls
 //===================
 
-var scale = L.control.scale(); // Creating scale control
-
 //origin lines
 L.circle(centerlatlng, {radius: 3, fill:false, color:'black'}).addTo(map);
 L.circle(centerlatlng, {radius: 1, fill:false, color:'black'}).addTo(map);
@@ -233,7 +231,6 @@ L.control.clearButton = function(opts) {
 	L.control.markerButton({ position: 'topright' }).addTo(map);
 	L.control.clearButton({ position: 'topright' }).addTo(map);
 	*/
-	scale.addTo(map); 
 
 	//===================	 
 	//map functions
@@ -330,6 +327,7 @@ L.control.clearButton = function(opts) {
 	}
 
 	//this turns map coords into game coords, i,e translates from 0,0 to whatever is in centerlatlng
+	// not needed really now since I now determine 0,0 via the bounding box
 	function translateSimpleToRealCoord(latlng){
 		var lat;
 		var lng;
