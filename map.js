@@ -76,13 +76,48 @@ map.addLayer(graticuleGroup)
 // create the sidebar instance and add it to the map
 var sidebar = L.control.sidebar({ container: 'sidebar', position: 'right' })
 	.addTo(map)
-	.open('home');
 
-sidebar.close();
+	sidebar.addPanel({
+		id:   'spacer1',
+		tab:  ' Tabs ',
+		title: '',
+	})
 
+	sidebar.addPanel({
+		id:   'home',
+		tab:  '<img class = "toolbar-icon" src="./images/home.svg" alt="H" > ',
+		title: '',
+	})
+	sidebar.addPanel({
+		id:   'details',
+		tab:  '<img class = "toolbar-icon" src="./images/info.svg" alt="I"> ',
+		title: '',
+	})
+	sidebar.addPanel({
+		id:   'importexport',
+		tab: '<img class = "toolbar-icon" src="./images/save.svg" alt="S" > ',
+		title: '',
+	})
+
+	sidebar.addPanel({
+		id:   'spacer2',
+		tab:  ' Tools ',
+		title: '',
+	})
+
+//Here we have the tool buttons
+sidebar.addPanel({
+	id:   'handtool',
+	tab: '<img class = "toolbar-icon" src="./images/hand.svg" alt="H"> ',
+	title: 'Hand Tool',
+	button: function() {
+		enableLayerClicks(duchyGroup); //need to disable to click through layers
+		toolFunction = "";
+	}
+})
 sidebar.addPanel({
 		id:   'measure',
-		tab:  ' <img class = "toolbar-icon" src="./images/distanceIcon.png" alt="Ms" style="width:100%;height:100%; padding: 1px;"> ',
+		tab:  ' <img class = "toolbar-icon" src="./images/distanceIcon.png" alt="Ms"> ',
 		title: 'Measure',
 		button: function() {
 			polylineDistance = 0;
@@ -93,7 +128,7 @@ sidebar.addPanel({
 	})
 sidebar.addPanel({
 	id:   'marker',
-	tab:  ' <img class = "toolbar-icon" src="./images/Marker.png" alt="Mk" style="width:100%;height:100%;padding-top:3px;"> ',
+	tab:  ' <img class = "toolbar-icon" src="./images/Marker.png" alt="Mk"> ',
 	title: 'Place Marker',
 	button: function() {toolFunction = "marker";
 	disableLayerClicks(duchyGroup); //need to disable to click through layers
@@ -101,19 +136,14 @@ sidebar.addPanel({
 })
 sidebar.addPanel({
 	id:   'clearmarkers',
-	tab:  ' <img class = "toolbar-icon" src="./images/trash.svg" alt="C" style="width:100%;height:100%;padding-top:3px;"> ',
+	tab:  ' <img class = "toolbar-icon" src="./images/trash.svg" alt="C"> ',
 	title: 'Clear All',
 	button: function() {clearMarkers();},
 })
-sidebar.addPanel({
-	id:   'handtool',
-	tab: '<img class = "toolbar-icon" src="./images/hand.svg" alt="H" style="width:100%;height:100%;padding-top:3px;"> ',
-	title: 'Hand Tool',
-	button: function() {
-		enableLayerClicks(duchyGroup); //need to disable to click through layers
-		toolFunction = "";
-	}
-})
+
+//Disables our spacing 'sidebars'
+sidebar.disablePanel('spacer1');
+sidebar.disablePanel('spacer2');
 
 //===================
 //Create controls

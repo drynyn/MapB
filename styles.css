@@ -32,3 +32,8 @@ body {
     padding-left:2px;
     text-shadow: -2px 0 #FFFFFF, 0 2px #FFFFFF, 2px 0 #FFFFFF, 0 -2px #FFFFFF;
 }
+
+.toolbar-icon {
+  width: 80%;
+  height: 80%;
+}
