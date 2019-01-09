@@ -1,0 +1,359 @@
+	//===================
+	//global var
+	//===================
+    var polylineDistance = 0;
+    var workingPolyline=L.polyline([],);
+    var noOfMeterToPixel = 128;
+    var toolFunction = "";
+	var centerlatlng = L.latLng([0,0]);// = L.latLng([1539,1035]);
+	var mapURL = "mapB.png";
+	var mapNoLines = "Map_B_NoLines.png";
+
+	//custom markers
+
+	//not used atm
+	var bullseye = L.icon({
+		iconUrl: 'target.png',
+		iconSize:     [30, 30], // size of the icon
+		iconAnchor:   [15, 15], // point of the icon which will correspond to marker's location
+	});
+
+//===================
+//map setup
+//===================
+//var bounds = [[0, 0], [2048,2048]];
+var bounds = [[-1539,-1035], [2048-1539,2048-1035]];
+
+var map = L.map("map", { crs: L.CRS.Simple,
+							minZoom: -1,
+						 });
+map.fitBounds(bounds);
+map.setView([0, 0], 1);
+
+//===================
+//Make Layer Objects
+//===================
+
+//image overlays for base maps
+var imagedetailed = L.imageOverlay(mapURL, bounds)
+var image = L.imageOverlay(mapNoLines, bounds); 
+map.addLayer(image);//adds map image to map object as default
+
+//the base map options
+var baseMaps = {
+"Default": image,
+"Detailed": imagedetailed
+}; 
+
+//setting up layer groups
+var duchyGroup = L.layerGroup(
+	[duchySix, duchyThree, duchyTwo, duchyOne, duchyFour,duchyFive, duchyEight, duchyFourteen, duchySeven, duchyTwelve, duchyEleven, duchyThirteen, duchyFiveteen, duchySixteen, duchySeventeen,duchyEighteen, duchyNineteen]);
+var kingdomGroup = L.layerGroup([kingdom]);
+var graticuleGroup = L.layerGroup();	
+
+//feature group for added markers, for easy clearing
+var markers = new L.FeatureGroup();
+map.addLayer(markers);
+
+var overlays = {"Dutchies": duchyGroup,
+			"Kingdoms": kingdomGroup,
+		"Graticule": graticuleGroup};
+
+L.control.layers( baseMaps, overlays, {position: 'topleft'}).addTo(map);
+
+//enable some layers by default
+map.addLayer(graticuleGroup)
+
+
+//===================
+//Set up map events
+//===================
+	map.on('click', (e)=>{this.onMapClick(e)});
+
+//===================
+//Sidepanel
+//===================
+// create the sidebar instance and add it to the map
+var sidebar = L.control.sidebar({ container: 'sidebar', position: 'right' })
+	.addTo(map)
+	.open('home');
+
+sidebar.close();
+
+sidebar.addPanel({
+		id:   'measure',
+		tab:  ' <img src="./images/distanceIcon.png" alt="Ms" style="width:100%;height:100%; padding: 1px;"> ',
+		title: 'Measure',
+		button: function() {
+			polylineDistance = 0;
+			workingPolyline=L.polyline([],{color: 'red', weight: 5});
+			toolFunction = "measure";
+			disableLayerClicks(duchyGroup); //need to disable to click through layers
+		},
+	})
+sidebar.addPanel({
+	id:   'marker',
+	tab:  ' <img src="./images/Marker.png" alt="Ms" style="width:100%;height:100%;padding-top:3px;"> ',
+	title: 'Place Marker',
+	button: function() {toolFunction = "marker";
+	disableLayerClicks(duchyGroup); //need to disable to click through layers
+
+},
+})
+sidebar.addPanel({
+	id:   'clearmarkers',
+	tab:  ' <img src="./images/X.png" alt="Ms" style="width:100%;height:100%;"> ',
+	title: 'Clear All',
+	button: function() {clearMarkers();},
+})
+
+sidebar.addPanel({
+	id:   'handtool',
+	tab:  ' H ',
+	title: 'Hand Tool',
+	button: function() {
+		enableLayerClicks(duchyGroup); //need to disable to click through layers
+		toolFunction = "";
+	}
+})
+	
+//===================
+//Create controls
+//===================
+
+var scale = L.control.scale(); // Creating scale control
+
+//origin lines
+L.circle(centerlatlng, {radius: 3, fill:false, color:'black'}).addTo(map);
+L.circle(centerlatlng, {radius: 1, fill:false, color:'black'}).addTo(map);
+var polyline = L.polyline([[centerlatlng.lat, bounds[0][1]],	[centerlatlng.lat, bounds[1][1]],],{color:'black', weight:1}).addTo(map); 
+var polyline = L.polyline([[bounds[0][0], centerlatlng.lng],	[bounds[1][0], centerlatlng.lng],],{color:'black', weight:1}).addTo(map); 
+ 
+/* Moved to the sidebar
+//Measurement button
+L.Control.measureButton = L.Control.extend({
+onAdd: function(map) {
+	var measureButton = L.DomUtil.create('button');
+	//measureButton.style.width = '50';
+	//measureButton.style.height = '50';
+	L.DomEvent.disableClickPropagation(measureButton);
+	measureButton.onclick = () => {
+		polylineDistance = 0;
+		workingPolyline=L.polyline([],{color: 'red', weight: 5});
+		toolFunction = "measure";
+	}
+	measureButton.innerHTML = 'Measure';
+
+	return measureButton;
+},
+
+onRemove: function(map) {
+	// Nothing to do here
+}
+});
+
+L.control.measureButton = function(opts) {
+return new L.Control.measureButton(opts);
+}
+	
+//Marker button
+L.Control.markerButton = L.Control.extend({
+	onAdd: function(map) {
+		var markerButton = L.DomUtil.create('button');
+		L.DomEvent.disableClickPropagation(markerButton);
+		markerButton.onclick = () => {
+			toolFunction = "marker";
+		}
+		markerButton.innerHTML = 'Marker';
+
+		return markerButton;
+	},
+
+	onRemove: function(map) {
+		// Nothing to do here
+	}
+});	
+
+L.control.markerButton = function(opts) {
+	return new L.Control.markerButton(opts);
+}
+
+//Clear button
+L.Control.clearButton = L.Control.extend({
+	onAdd: function(map) {
+		var clearButton = L.DomUtil.create('button');
+		L.DomEvent.disableClickPropagation(clearButton);
+		clearButton.onclick = () => {
+			clearMarkers();
+		}
+		clearButton.innerHTML = 'Clear';
+
+		return clearButton;
+	},
+
+	onRemove: function(map) {
+		// Nothing to do here
+	}
+});	
+
+L.control.clearButton = function(opts) {
+	return new L.Control.clearButton(opts);
+}
+
+	//Add all controls to map
+	L.control.measureButton({ position: 'topright' }).addTo(map);
+	L.control.markerButton({ position: 'topright' }).addTo(map);
+	L.control.clearButton({ position: 'topright' }).addTo(map);
+	*/
+	scale.addTo(map); 
+
+	//===================	 
+	//map functions
+	//===================	 
+	function onMapClick(e) {
+		switch (toolFunction) {
+			case 'marker':
+			placeMarker (e.latlng);
+            break;
+            case 'measure':
+                placeMeasurePolyline(e.latlng);
+			break;
+            default:
+              //No default
+          }
+	}
+    //===================
+    //Map Click Functions
+    //===================
+    function placeMarker (latlng) {
+		var translatlng = translateSimpleToRealCoord(latlng);
+		return marker = L.marker(latlng).bindPopup('Coord: ' + translatlng.lat.toFixed(2) + ', ' + translatlng.lng.toFixed(2)).addTo(markers);		
+    }
+
+    function placeMeasurePolyline(latlng){
+
+		//extend polyline
+        workingPolyline.addLatLng(latlng).addTo(markers);
+		
+		//make marker at end of line
+        var marker = L.marker(latlng).addTo(markers);
+
+        //bind pop up text
+		var popupStringLine = 'Total Distance: ' +       (sumPolylineDistance(workingPolyline) * noOfMeterToPixel).toFixed(2) + ' ' + getPolyCoords(workingPolyline);
+		var popupStringMarker = 'Distance to marker: ' + (sumPolylineDistance(workingPolyline) * noOfMeterToPixel).toFixed(2);
+		//bind popups
+        workingPolyline.bindPopup(popupStringLine);
+        marker.bindPopup(popupStringMarker);
+	}
+	
+	function clearMarkers(){
+		markers.clearLayers();
+		polylineDistance = 0;
+		workingPolyline=L.polyline([],{color: 'red', weight: 5});
+	}
+    
+    //===================
+    //Helper Functions
+	//===================
+	
+	//turn off click events on groups layers
+	function disableLayerClicks(group){
+		group.eachLayer(function (layer) {
+			layer.off('click', this.openPopup);
+		});
+	}
+
+	//turn on click events on groups layers
+	function enableLayerClicks(group){
+		group.eachLayer(function (layer) {
+			layer.on('click',  function (e) {
+				this.openPopup();
+			});
+		});
+	}
+	//turns a polyline into coords
+	function getPolyCoords(polyline){
+		var latlngs = polyline.getLatLngs();
+        var textResult;
+
+        latlngs.forEach(function (latlngs, index) {
+            if (index > 0){
+                textResult += ' ['+latlngs.lat+ ' , ' + latlngs.lng+']' + ' , \r ';
+            }
+        });
+        
+        return textResult;
+	}
+
+	//this turns map coords into game coords, i,e translates from 0,0 to whatever is in centerlatlng
+	function translateSimpleToRealCoord(latlng){
+		var lat;
+		var lng;
+		lat = latlng.lat - centerlatlng.lat;
+		lng = latlng.lng - centerlatlng.lng;
+		
+		return  L.latLng([lat,lng]);
+	}
+
+	//flat cos the world is flat probably
+	function flatDistanceTo(latlngA, latlngB){
+		var x1 = latlngA.lat;
+		var y1 = latlngA.lng;
+		var x2 = latlngB.lat;
+		var y2 = latlngB.lng;
+		
+		return Math.sqrt((x2 - x1)**2 + (y2 - y1)**2);
+    }
+    
+    function sumPolylineDistance(polyline){
+        var latlngs = polyline.getLatLngs();
+        var runningTotal = 0;
+        var previousLatlng = []; 
+
+        latlngs.forEach(function (latlngs, index) {
+            if (index > 0){
+                runningTotal += flatDistanceTo(previousLatlng, latlngs);                
+            }
+            previousLatlng = latlngs;
+        });
+        
+        return runningTotal;
+    }
+    
+	
+
+
+/*
+	var plottedPolyline = L.Polyline.Plotter([
+			[1324,998],
+			[1344, 1020],		
+			[1338, 1038],
+			[1340, 1066],
+			[1350,1080],
+			[1352, 1108],
+			[1340, 1140],
+			[1322, 1090],
+			[1278, 1056],
+			[1270, 1016],
+			[1278,986]
+	],{
+		weight: 5
+	}).addTo(map);
+ var xxx = L.latLng([1539,1035]);
+
+
+	plottedPolyline.addLatLng(xxx).addTo(map);
+*/
+
+///////////////////
+//Setup of Graticle
+//////////////////
+var options = {
+		interval: 40,
+		showOriginLabel: true,
+		redraw: 'move',
+		};
+
+L.simpleGraticule(options).addTo(graticuleGroup);
+
+
