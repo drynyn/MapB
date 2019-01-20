@@ -71,7 +71,6 @@ function duchyClick(){
 
 //enable some layers by default
 map.addLayer(graticuleGroup);
-map.addLayer(kingdomGroup);
 
 //parsing duchy geojsons
 L.geoJSON(duchyGeo, {

@@ -1795,7 +1795,7 @@ var kingdomGeo  =
      weight: 2,
      color: "black",
      opacity: 0.2,
-     fillColor: "violet",
+     fillColor: "Magenta",
      fillOpacity: 0.2
             }
         },
