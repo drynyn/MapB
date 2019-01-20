@@ -50,6 +50,8 @@ var baseMaps = {
 var duchyGroup = L.geoJSON();
 var kingdomGroup =  L.geoJSON();
 var graticuleGroup = L.layerGroup();
+var acreGraticuleGroup = L.layerGroup();
+
 
 //feature group for added markers, for easy clearing
 var markers = new L.FeatureGroup();
@@ -57,7 +59,9 @@ map.addLayer(markers);
 
 var overlays = {"Dutchies": duchyGroup,
 			"Kingdoms": kingdomGroup,
-		"Graticule": graticuleGroup};
+		"Graticule": graticuleGroup,
+		"Acre Graticle" : acreGraticuleGroup
+	};
 
 L.control.layers( baseMaps, overlays, {position: 'topleft'}).addTo(map);
 
@@ -429,13 +433,26 @@ L.control.clearButton = function(opts) {
 ///////////////////
 //Setup of Graticle
 //////////////////
-var options = {
+var optionsGraticle = {
 		interval: 40,
 		showOriginLabel: true,
 		redraw: 'move',
 		};
 
-L.simpleGraticule(options).addTo(graticuleGroup);
+L.simpleGraticule(optionsGraticle).addTo(graticuleGroup);
+
+
+//Acre Graticle
+var optionsAcre = {
+	interval: 1,
+	showOriginLabel: true,
+	redraw: 'move',
+	};
+
+L.simpleGraticule(optionsAcre).addTo(acreGraticuleGroup);
+
+
+
 
 //on draw function, to get polygon coords.
 map.on('draw:created', function (e) {
@@ -445,7 +462,6 @@ map.on('draw:created', function (e) {
     if (type === 'polygon') {
         // here you got the polygon points
         var points = layer._latlngs;
-alert(points);
         // here you can get it in geojson format
         var geojson = layer.toGeoJSON();
    }
