@@ -46,10 +46,12 @@ var baseMaps = {
 }; 
 
 //setting up layer groups
-var duchyGroup = L.layerGroup(
-	[duchySix, duchyThree, duchyTwo, duchyOne, duchyFour,duchyFive, duchyEight, duchyFourteen, duchySeven, duchyTwelve, duchyEleven, duchyThirteen, duchyFiveteen, duchySixteen, duchySeventeen,duchyEighteen, duchyNineteen]);
+
+var duchyGroup = L.geoJSON();
+//	[duchyThree, duchyFour,duchyFive, duchySix, duchySeven, duchyEight, duchyEleven, duchyTwelve, duchyThirteen, 
+//														duchyFourteen, duchyFifteen, duchySixteen, duchySeventeen, duchyEighteen, duchyNineteen]);
 var kingdomGroup = L.layerGroup([kingdom]);
-var graticuleGroup = L.layerGroup();	
+var graticuleGroup = L.layerGroup();
 
 //feature group for added markers, for easy clearing
 var markers = new L.FeatureGroup();
@@ -61,8 +63,26 @@ var overlays = {"Dutchies": duchyGroup,
 
 L.control.layers( baseMaps, overlays, {position: 'topleft'}).addTo(map);
 
+function duchyClick(){
+	alert('click');
+}
+
 //enable some layers by default
 map.addLayer(graticuleGroup)
+
+//parsing duchy geojsons
+L.geoJSON(duchyGeo, {
+	style: function (feature) {
+		return feature.properties && feature.properties.style;
+	},
+	onEachFeature: onEachFeature
+    }
+).addTo(duchyGroup);
+
+function onEachFeature(feature, layer) {
+	//layer.bindPopup(feature.properties.duchyRef + ': ' + feature.properties.popupContent);
+	layer.bindTooltip(feature.properties.duchyRef + ': ' + feature.properties.popupContent);
+}
 
 
 //===================
@@ -297,14 +317,14 @@ L.control.clearButton = function(opts) {
     //Helper Functions
 	//===================
 	
-	//turn off click events on groups layers
+	//turn off click events on groups layers, doesnt works with how i have made the geojson layers
 	function disableLayerClicks(group){
 		group.eachLayer(function (layer) {
 			layer.off('click', this.openPopup);
 		});
 	}
 
-	//turn on click events on groups layers
+	//turn on click events on groups layers, doesnt works with how i have made the geojson layers
 	function enableLayerClicks(group){
 		group.eachLayer(function (layer) {
 			layer.on('click',  function (e) {
@@ -312,6 +332,17 @@ L.control.clearButton = function(opts) {
 			});
 		});
 	}
+
+	function disableLayerPopups(group){
+		group.eachLayer(function (layer) {
+		})
+	}
+
+	function setupLayerPopups(group){
+		group.eachLayer(function (layer) {
+		})
+	}
+
 	//turns a polyline into coords
 	function getPolyCoords(polyline){
 		var latlngs = polyline.getLatLngs();
@@ -319,7 +350,9 @@ L.control.clearButton = function(opts) {
 
         latlngs.forEach(function (latlngs, index) {
             if (index > 0){
-                textResult += ' ['+latlngs.lat+ ' , ' + latlngs.lng+']' + ' , \r ';
+                //textResult += ' ['+latlngs.lat+ ' , ' + latlngs.lng+']' + ' , \r ';
+				//For geojsons 
+				textResult += ' ['+latlngs.lng+ ' , ' + latlngs.lat+']' + ' , \r ';
             }
         });
         
@@ -361,9 +394,6 @@ L.control.clearButton = function(opts) {
         
         return runningTotal;
     }
-    
-	
-
 
 /*
 	var plottedPolyline = L.Polyline.Plotter([
@@ -398,4 +428,18 @@ var options = {
 
 L.simpleGraticule(options).addTo(graticuleGroup);
 
+//on draw function, to get polygon coords.
+map.on('draw:created', function (e) {
+    var type = e.layerType,
+        layer = e.layer;
 
+    if (type === 'polygon') {
+        // here you got the polygon points
+        var points = layer._latlngs;
+alert(points);
+        // here you can get it in geojson format
+        var geojson = layer.toGeoJSON();
+   }
+   // here you add it to a layer to display it in the map
+   drawnItems.addLayer(layer);
+});

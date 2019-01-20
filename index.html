@@ -22,6 +22,9 @@
     <script src="leaflet-sidebar.js"></script>
     <script src="leaflet.plotter.min.js"></script>
     
+    <!--Turf is for merging polygons, only needed when I need to make the kingdom polygon-->
+    <script src="turf.min.js" charset="utf-8"></script><script src="turf.min.js" charset="utf-8"></script>
+
     <link rel="stylesheet" href="styles.css" />   
     <link rel="stylesheet" href="leaflet-sidebar.css" />
 
@@ -78,6 +81,17 @@
     <script src="overlay.js"></script>
 
     <script src="map.js"></script>
+<script>
+  var t = require('turf'),
+  fs = require('fs')
 
+// mergeIn.geojson contains a feature collection of polygons
+t.load('./mergeIn.geojson', function(err, polygons){
+  t.merge(polygons, function(err, mergeOut){
+    // mergeOut is a single polygon feature
+    fs.writeFileSync('./merge.geojson', JSON.stringify(mergeOut))
+  })
+})
+  </script>
   </body>
 </html>
