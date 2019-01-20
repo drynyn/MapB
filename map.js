@@ -48,9 +48,7 @@ var baseMaps = {
 //setting up layer groups
 
 var duchyGroup = L.geoJSON();
-//	[duchyThree, duchyFour,duchyFive, duchySix, duchySeven, duchyEight, duchyEleven, duchyTwelve, duchyThirteen, 
-//														duchyFourteen, duchyFifteen, duchySixteen, duchySeventeen, duchyEighteen, duchyNineteen]);
-var kingdomGroup = L.layerGroup([kingdom]);
+var kingdomGroup =  L.geoJSON();
 var graticuleGroup = L.layerGroup();
 
 //feature group for added markers, for easy clearing
@@ -75,15 +73,26 @@ L.geoJSON(duchyGeo, {
 	style: function (feature) {
 		return feature.properties && feature.properties.style;
 	},
-	onEachFeature: onEachFeature
+	onEachFeature: onEachDuchyFeature
     }
 ).addTo(duchyGroup);
 
-function onEachFeature(feature, layer) {
-	//layer.bindPopup(feature.properties.duchyRef + ': ' + feature.properties.popupContent);
+function onEachDuchyFeature(feature, layer) {
 	layer.bindTooltip(feature.properties.duchyRef + ': ' + feature.properties.popupContent);
 }
 
+//parsing kingdom geojson (atm we cheat by using the duchy geojson)
+L.geoJSON(duchyGeo, {
+	style: function (feature) {
+		return feature.properties ;
+	},
+	onEachFeature: onEachKingdomFeature
+    }
+).addTo(kingdomGroup);
+
+function onEachKingdomFeature(feature, layer) {
+	//nothing atm
+}
 
 //===================
 //Set up map events
