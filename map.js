@@ -82,7 +82,7 @@ L.geoJSON(duchyGeo, {
 ).addTo(duchyGroup);
 
 function onEachDuchyFeature(feature, layer) {
-	layer.bindTooltip(feature.properties.kingdomRef + ': ' + feature.properties.popupContent);
+	layer.bindTooltip(feature.properties.duchyRef + ': ' + feature.properties.popupContent);
 }
 
 //parsing kingdom geojson (atm we cheat by using the duchy geojson)
@@ -95,7 +95,7 @@ L.geoJSON(kingdomGeo, {
 ).addTo(kingdomGroup);
 
 function onEachKingdomFeature(feature, layer) {
-	layer.bindTooltip(feature.properties.duchyRef + ': ' + feature.properties.popupContent);
+	layer.bindTooltip(feature.properties.kingdomRef + ': ' + feature.properties.popupContent);
 
 }
 
