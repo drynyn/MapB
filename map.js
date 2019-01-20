@@ -60,7 +60,7 @@ map.addLayer(markers);
 var overlays = {"Dutchies": duchyGroup,
 			"Kingdoms": kingdomGroup,
 		"Graticule": graticuleGroup,
-		"Acre Graticle" : acreGraticuleGroup
+		"Acre Graticle (slow)" : acreGraticuleGroup
 	};
 
 L.control.layers( baseMaps, overlays, {position: 'topleft'}).addTo(map);
@@ -70,7 +70,8 @@ function duchyClick(){
 }
 
 //enable some layers by default
-map.addLayer(graticuleGroup)
+map.addLayer(graticuleGroup);
+map.addLayer(kingdomGroup);
 
 //parsing duchy geojsons
 L.geoJSON(duchyGeo, {
@@ -82,20 +83,21 @@ L.geoJSON(duchyGeo, {
 ).addTo(duchyGroup);
 
 function onEachDuchyFeature(feature, layer) {
-	layer.bindTooltip(feature.properties.duchyRef + ': ' + feature.properties.popupContent);
+	layer.bindTooltip(feature.properties.kingdomRef + ': ' + feature.properties.popupContent);
 }
 
 //parsing kingdom geojson (atm we cheat by using the duchy geojson)
-L.geoJSON(duchyGeo, {
+L.geoJSON(kingdomGeo, {
 	style: function (feature) {
-		return feature.properties ;
+		return feature.properties && feature.properties.style;
 	},
 	onEachFeature: onEachKingdomFeature
     }
 ).addTo(kingdomGroup);
 
 function onEachKingdomFeature(feature, layer) {
-	//nothing atm
+	layer.bindTooltip(feature.properties.duchyRef + ': ' + feature.properties.popupContent);
+
 }
 
 //===================
@@ -313,8 +315,8 @@ L.control.clearButton = function(opts) {
         var marker = L.marker(latlng).addTo(markers);
 
         //bind pop up text
-		var popupStringLine = 'Total Distance: ' +       (sumPolylineDistance(workingPolyline) * noOfMeterToPixel).toFixed(2) + ' ' + getPolyCoords(workingPolyline);
-		var popupStringMarker = 'Distance to marker: ' + (sumPolylineDistance(workingPolyline) * noOfMeterToPixel).toFixed(2);
+		var popupStringLine = 'Total Distance: ' +       (sumPolylineDistance(workingPolyline) * noOfMeterToPixel).toFixed(2) + ' km ' + getPolyCoords(workingPolyline);
+		var popupStringMarker = 'Distance to marker: ' + (sumPolylineDistance(workingPolyline) * noOfMeterToPixel).toFixed(2) + ' km';
 		//bind popups
         workingPolyline.bindPopup(popupStringLine);
         marker.bindPopup(popupStringMarker);
