@@ -179,6 +179,15 @@ sidebar.addPanel({
 sidebar.disablePanel('spacer1');
 sidebar.disablePanel('spacer2');
 
+//========
+//Tool Panel events
+//========
+
+//Click event to pull marker data 
+document.getElementById("sidebar-marker-export-button").addEventListener("click", function(){
+	pushMarkerDataToPanel();
+}); 
+
 //===================
 //Create controls
 //===================
@@ -188,83 +197,6 @@ L.circle(centerlatlng, {radius: 3, fill:false, color:'black'}).addTo(map);
 L.circle(centerlatlng, {radius: 1, fill:false, color:'black'}).addTo(map);
 var polyline = L.polyline([[centerlatlng.lat, bounds[0][1]],	[centerlatlng.lat, bounds[1][1]],],{color:'black', weight:1}).addTo(map); 
 var polyline = L.polyline([[bounds[0][0], centerlatlng.lng],	[bounds[1][0], centerlatlng.lng],],{color:'black', weight:1}).addTo(map); 
- 
-/* Moved to the sidebar
-//Measurement button
-L.Control.measureButton = L.Control.extend({
-onAdd: function(map) {
-	var measureButton = L.DomUtil.create('button');
-	//measureButton.style.width = '50';
-	//measureButton.style.height = '50';
-	L.DomEvent.disableClickPropagation(measureButton);
-	measureButton.onclick = () => {
-		polylineDistance = 0;
-		workingPolyline=L.polyline([],{color: 'red', weight: 5});
-		toolFunction = "measure";
-	}
-	measureButton.innerHTML = 'Measure';
-
-	return measureButton;
-},
-
-onRemove: function(map) {
-	// Nothing to do here
-}
-});
-
-L.control.measureButton = function(opts) {
-return new L.Control.measureButton(opts);
-}
-	
-//Marker button
-L.Control.markerButton = L.Control.extend({
-	onAdd: function(map) {
-		var markerButton = L.DomUtil.create('button');
-		L.DomEvent.disableClickPropagation(markerButton);
-		markerButton.onclick = () => {
-			toolFunction = "marker";
-		}
-		markerButton.innerHTML = 'Marker';
-
-		return markerButton;
-	},
-
-	onRemove: function(map) {
-		// Nothing to do here
-	}
-});	
-
-L.control.markerButton = function(opts) {
-	return new L.Control.markerButton(opts);
-}
-
-//Clear button
-L.Control.clearButton = L.Control.extend({
-	onAdd: function(map) {
-		var clearButton = L.DomUtil.create('button');
-		L.DomEvent.disableClickPropagation(clearButton);
-		clearButton.onclick = () => {
-			clearMarkers();
-		}
-		clearButton.innerHTML = 'Clear';
-
-		return clearButton;
-	},
-
-	onRemove: function(map) {
-		// Nothing to do here
-	}
-});	
-
-L.control.clearButton = function(opts) {
-	return new L.Control.clearButton(opts);
-}
-
-	//Add all controls to map
-	L.control.measureButton({ position: 'topright' }).addTo(map);
-	L.control.markerButton({ position: 'topright' }).addTo(map);
-	L.control.clearButton({ position: 'topright' }).addTo(map);
-	*/
 
 	//===================	 
 	//map functions
@@ -273,13 +205,13 @@ L.control.clearButton = function(opts) {
 		switch (toolFunction) {
 			case 'marker':
 			placeMarker (e.latlng);
-            break;
-            case 'measure':
-                placeMeasurePolyline(e.latlng);
 			break;
-            default:
-              //No default
-          }
+			case 'measure':
+				placeMeasurePolyline(e.latlng);
+			break;
+			default:
+				//No default
+			}
 	}
     //===================
     //Map Click Functions
@@ -292,6 +224,10 @@ L.control.clearButton = function(opts) {
 		marker.bindPopup(popupText + ' ' + "</br><input type='button' value='Delete' class='marker-delete-button'/>");
 		marker.on("popupopen", onMarkerPopupOpen);
 		marker.addTo(markers);
+
+		//update export panel
+		saveMarkersToText();
+
 		return marker;		
 		}
 	
@@ -409,27 +345,30 @@ L.control.clearButton = function(opts) {
         return runningTotal;
     }
 
-/*
-	var plottedPolyline = L.Polyline.Plotter([
-			[1324,998],
-			[1344, 1020],		
-			[1338, 1038],
-			[1340, 1066],
-			[1350,1080],
-			[1352, 1108],
-			[1340, 1140],
-			[1322, 1090],
-			[1278, 1056],
-			[1270, 1016],
-			[1278,986]
-	],{
-		weight: 5
-	}).addTo(map);
- var xxx = L.latLng([1539,1035]);
+	//atm redundant due to pushMarkerDataToPanel
+	function saveMarkersToText(){
 
+		var features = [];
+		markers.eachLayer( function(layer) {
+		  if(layer instanceof L.Marker) {
+			if(markers.getBounds().contains(layer.getLatLng())) {
+			  features.push(layer.getLatLng());
+			}
+		  }
+		});
+		return(features);
+	  }
 
-	plottedPolyline.addLatLng(xxx).addTo(map);
-*/
+	  function pushMarkerDataToPanel(){
+		var pointsTextArea = document.getElementById("sidebar-marker-export");
+        pointsTextArea.innerHTML = '';
+
+		markers.eachLayer( function(layer) {
+		if(layer instanceof L.Marker) {
+			pointsTextArea.innerHTML += layer.getLatLng() + ' ';
+			}
+		});
+	  }
 
 ///////////////////
 //Setup of Graticle
@@ -451,8 +390,6 @@ var optionsAcre = {
 	};
 
 L.simpleGraticule(optionsAcre).addTo(acreGraticuleGroup);
-
-
 
 
 //on draw function, to get polygon coords.
