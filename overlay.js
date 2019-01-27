@@ -1842,3 +1842,4 @@ var kingdomGeo  =
   }
   ]
 
+var testggjson = {"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[3.5,-3.448672]}}

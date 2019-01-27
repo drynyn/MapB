@@ -8,6 +8,7 @@
 	var centerlatlng = L.latLng([0,0]);// = L.latLng([1539,1035]);
 	var mapURL = "mapB.png";
 	var mapNoLines = "Map_B_NoLines.png";
+	var exportjsonData; //trying to get jsons imported/exported
 
 	//custom markers
 
@@ -64,10 +65,6 @@ var overlays = {"Dutchies": duchyGroup,
 	};
 
 L.control.layers( baseMaps, overlays, {position: 'topleft'}).addTo(map);
-
-function duchyClick(){
-	alert('click');
-}
 
 //enable some layers by default
 map.addLayer(graticuleGroup);
@@ -188,6 +185,11 @@ document.getElementById("sidebar-marker-export-button").addEventListener("click"
 	pushMarkerDataToPanel();
 }); 
 
+//click event to push marker data
+document.getElementById("sidebar-marker-import-button").addEventListener("click", function(){
+	pushMarkerDataToMap();
+}); 
+
 //===================
 //Create controls
 //===================
@@ -226,7 +228,7 @@ var polyline = L.polyline([[bounds[0][0], centerlatlng.lng],	[bounds[1][0], cent
 		marker.addTo(markers);
 
 		//update export panel
-		saveMarkersToText();
+		pushMarkerDataToPanel();
 
 		return marker;		
 		}
@@ -237,7 +239,8 @@ var polyline = L.polyline([[bounds[0][0], centerlatlng.lng],	[bounds[1][0], cent
 	
 		// To remove marker on click of delete button in the popup of marker
 		$(".marker-delete-button:visible").click(function () {
-			map.removeLayer(tempMarker);
+			markers.removeLayer(tempMarker);
+			pushMarkerDataToPanel();
 		});
 	}
 
@@ -250,17 +253,22 @@ var polyline = L.polyline([[bounds[0][0], centerlatlng.lng],	[bounds[1][0], cent
         var marker = L.marker(latlng).addTo(markers);
 
         //bind pop up text
-		var popupStringLine = 'Total Distance: ' +       (sumPolylineDistance(workingPolyline) * noOfMeterToPixel).toFixed(2) + ' km ' + getPolyCoords(workingPolyline);
+		var popupStringLine = 'Total Distance: ' +       (sumPolylineDistance(workingPolyline) * noOfMeterToPixel).toFixed(2) + ' km ';
 		var popupStringMarker = 'Distance to marker: ' + (sumPolylineDistance(workingPolyline) * noOfMeterToPixel).toFixed(2) + ' km';
 		//bind popups
         workingPolyline.bindPopup(popupStringLine);
-        marker.bindPopup(popupStringMarker);
+		marker.bindPopup(popupStringMarker);
+		
+		//push to export panel
+		pushMarkerDataToPanel();
 	}
 	
 	function clearMarkers(){
 		markers.clearLayers();
 		polylineDistance = 0;
 		workingPolyline=L.polyline([],{color: 'red', weight: 5});
+		document.getElementById("sidebar-marker-export").innerHTML = '';
+		exportjsonData = null;
 	}
     
     //===================
@@ -345,7 +353,7 @@ var polyline = L.polyline([[bounds[0][0], centerlatlng.lng],	[bounds[1][0], cent
         return runningTotal;
     }
 
-	//atm redundant due to pushMarkerDataToPanel
+	//atm redundant due to pushMarkerDataTo Panel
 	function saveMarkersToText(){
 
 		var features = [];
@@ -359,16 +367,35 @@ var polyline = L.polyline([[bounds[0][0], centerlatlng.lng],	[bounds[1][0], cent
 		return(features);
 	  }
 
-	  function pushMarkerDataToPanel(){
+	function pushMarkerDataToPanel(){
 		var pointsTextArea = document.getElementById("sidebar-marker-export");
         pointsTextArea.innerHTML = '';
+		exportjsonData = markers.toGeoJSON();
+		pointsTextArea.innerHTML =  JSON.stringify(exportjsonData);
+	}
 
-		markers.eachLayer( function(layer) {
-		if(layer instanceof L.Marker) {
-			pointsTextArea.innerHTML += layer.getLatLng() + ' ';
+	function pushMarkerDataToMap(){
+		//var pointsTextArea =	JSON.parse(document.getElementById("sidebar-marker-export-form").innerHTML);
+		var promptAction = prompt('Press CTRL+V to paste geojson data', '');
+		if(promptAction !== null && promptAction !== '') {
+				//need to add something to check data
+					L.geoJSON(JSON.parse(promptAction), {
+					style: function (feature) {
+						return feature.properties && feature.properties.style;
+					},
+					onEachFeature: onEachMarkerFeature
+					}
+				).addTo(markers);
 			}
-		});
-	  }
+	}
+	
+
+	function onEachMarkerFeature(feature, layer) {
+		//var popupText = 'Coord: ' + layer.lat.toFixed(2) + ', ' + layer.lng.toFixed(2)
+		layer.bindTooltip( ' ' + "</br><input type='button' value='Delete' class='marker-delete-button'/>");
+		layer.on("popupopen", onMarkerPopupOpen);
+
+	}
 
 ///////////////////
 //Setup of Graticle
