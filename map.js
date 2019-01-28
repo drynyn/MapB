@@ -82,7 +82,7 @@ function onEachDuchyFeature(feature, layer) {
 	layer.bindTooltip(feature.properties.duchyRef + ': ' + feature.properties.popupContent);
 }
 
-//parsing kingdom geojson (atm we cheat by using the duchy geojson)
+//parsing kingdom geojson 
 L.geoJSON(kingdomGeo, {
 	style: function (feature) {
 		return feature.properties && feature.properties.style;
@@ -388,7 +388,6 @@ var polyline = L.polyline([[bounds[0][0], centerlatlng.lng],	[bounds[1][0], cent
 				).addTo(markers);
 			}
 	}
-	
 
 	function onEachMarkerFeature(feature, layer) {
 		//var popupText = 'Coord: ' + layer.lat.toFixed(2) + ', ' + layer.lng.toFixed(2)
