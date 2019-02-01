@@ -376,7 +376,7 @@ var polyline = L.polyline([[bounds[0][0], centerlatlng.lng],	[bounds[1][0], cent
 
 	function pushMarkerDataToMap(){
 		//var pointsTextArea =	JSON.parse(document.getElementById("sidebar-marker-export-form").innerHTML);
-		var promptAction = prompt('Press CTRL+V to paste geojson data', '');
+		var promptAction = prompt('Paste geojson data to import.', '');
 		if(promptAction !== null && promptAction !== '') {
 				//need to add something to check data
 					L.geoJSON(JSON.parse(promptAction), {
@@ -385,16 +385,23 @@ var polyline = L.polyline([[bounds[0][0], centerlatlng.lng],	[bounds[1][0], cent
 					},
 					onEachFeature: onEachMarkerFeature
 					}
-				).addTo(markers);
+				)
 			}
+			//update panel again
+			pushMarkerDataToPanel();
 	}
 
-	function onEachMarkerFeature(feature, layer) {
-		//var popupText = 'Coord: ' + layer.lat.toFixed(2) + ', ' + layer.lng.toFixed(2)
-		layer.bindTooltip( ' ' + "</br><input type='button' value='Delete' class='marker-delete-button'/>");
-		layer.on("popupopen", onMarkerPopupOpen);
-
+	function onEachMarkerFeature(feature, marker) {
+		if(feature.type = 'Point'){
+			placeMarker(marker.getLatLng());
+		} else if (feature.type = 'LineString'){
+			placeMeasurePolyline(marker.getLatLng());
+		}
+		//need to reset the polyline var
+		var workingPolyline=L.polyline([],);
 	}
+	//update export panel
+	pushMarkerDataToPanel();
 
 ///////////////////
 //Setup of Graticle
